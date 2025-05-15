@@ -33,32 +33,21 @@ public class JwtUtil {
 		secretKey = Base64.getEncoder().encodeToString(key);
 	}
 
-	public String generateToken(String username) {
-		return Jwts.builder().setSubject(username).setIssuedAt(new Date(System.currentTimeMillis()))
+//	1. Without role generate toen
+
+//	public String generateToken(String username) {
+//		return Jwts.builder().setSubject(username).setIssuedAt(new Date(System.currentTimeMillis()))
+//				.setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 10)) // 10 minutes
+//				.signWith(getSignedKey(), SignatureAlgorithm.HS256).compact();
+//	}
+
+//	2. Without role generate toen
+	public String generateToken(String username, List<String> roles) {
+		return Jwts.builder().setSubject(username).claim("roles", roles)
+				.setIssuedAt(new Date(System.currentTimeMillis()))
 				.setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 10)) // 10 minutes
 				.signWith(getSignedKey(), SignatureAlgorithm.HS256).compact();
 	}
-	
-//	public String generateToken(UserDetails userDetails) {
-//	    Map<String, Object> claims = new HashMap<>();
-//
-//	    // Get role(s) from authorities
-//	    List<String> roles = userDetails.getAuthorities()
-//	                                    .stream()
-//	                                    .map(GrantedAuthority::getAuthority)
-//	                                    .collect(Collectors.toList());
-//
-//	    claims.put("roles", roles);
-//
-//	    return Jwts.builder()
-//	            .setClaims(claims)
-//	            .setSubject(userDetails.getUsername())
-//	            .setIssuedAt(new Date(System.currentTimeMillis()))
-//	            .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 10))
-//	            .signWith(getSignedKey(), SignatureAlgorithm.HS256)
-//	            .compact();
-//	}
-
 
 	private Key getSignedKey() {
 		byte[] keyBytes = Decoders.BASE64.decode(secretKey);
@@ -84,9 +73,9 @@ public class JwtUtil {
 		return extractExpiration(token).before(new Date());
 	}
 
-//	public List<String> extractRole(String token) {
-//		return extractClaim(token, claims -> claims.get("roles", List.class));
-//	}
+	public List<String> extractRole(String token) {
+		return extractClaim(token, claims -> claims.get("roles", List.class));
+	}
 
 	public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
 		final Claims claims = Jwts.parserBuilder().setSigningKey(getSignedKey()).build().parseClaimsJws(token)

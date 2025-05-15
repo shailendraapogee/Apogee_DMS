@@ -1,8 +1,12 @@
 package dms.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import dms.entity.User;
 import dms.security.JwtUtil;
+import dms.security.UserPrincipal;
 import dms.service.MyUserDetailsService;
 
 @RestController
@@ -30,6 +35,13 @@ public class UserController {
 	@Autowired
 	private MyUserDetailsService userDetailsService;
 
+//	http://localhost:8082/user/register
+//		
+//	{
+//	    "username" : "shailu@gmail.com",
+//	    "password" : "shailu@123",
+//	    "role":"ROLE_ADMIN"
+//	}
 	@PostMapping("/register")
 	public ResponseEntity<User> register(@RequestBody User user) {
 		User createdUser = userDetailsService.createUser(user);
@@ -49,14 +61,35 @@ public class UserController {
 //		return "Hii";
 //
 //	}
+	
 
+//	http://localhost:8082/user/login
+//		
+//	{
+//	    "username" : "ram@gmail.com",
+//	    "password" : "ram@123"
+//	}
 	@PostMapping("/login")
 	public ResponseEntity<String> login(@RequestBody User user) {
 		UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
+		
+		 if (!(userDetails instanceof UserPrincipal)) {
+	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Invalid user details type");
+	        }
+
+	        UserPrincipal principal = (UserPrincipal) userDetails;
+
+	        if (!principal.isApproved()) {
+	            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+	                    .body("Your account is not approved by the admin yet.");
+	        }
 
 		if (passwordEncoder.matches(user.getPassword(), userDetails.getPassword())) {
-			String token = jwtUtil.generateToken(userDetails.getUsername());
-//			String token = jwtUtil.generateToken(userDetails);
+			List<String> roles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority)
+					.collect(Collectors.toList());
+
+			String token = jwtUtil.generateToken(userDetails.getUsername(), roles);
+//			String token = jwtUtil.generateToken(userDetails.getUsername());
 			return ResponseEntity.ok(token);
 		} else {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");

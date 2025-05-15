@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import dms.entity.User;
 
+//1. With Role
 public class UserPrincipal implements UserDetails {
 	private User user;
 
@@ -16,10 +17,12 @@ public class UserPrincipal implements UserDetails {
 		this.user = user;
 	}
 
-//    @Override
-//    public Collection<? extends GrantedAuthority> getAuthorities() {
-//        return List.of(new SimpleGrantedAuthority("ROLE_SELLER"));
-//    }
+	// Custom method to access approval
+	public boolean isApproved() {
+		return user.isApproval();
+	}
+
+//	Get Role --> from db 
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -36,6 +39,8 @@ public class UserPrincipal implements UserDetails {
 		return user.getUsername();
 	}
 }
+
+//2. Without Role
 
 //public class UserPrincipal implements UserDetails {
 //

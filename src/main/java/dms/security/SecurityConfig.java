@@ -22,13 +22,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
-	
+
 	@Autowired
 	private UserDetailsService userDetailsService;
-	
+
 	@Autowired
 	private JwtRequestFilter requestFilter;
 
+//1.	Basic Configuration
 //	@Bean
 //	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 //		http.csrf(csrf -> csrf.disable()) // Disable CSRF for APIs (if needed)
@@ -41,29 +42,24 @@ public class SecurityConfig {
 //		return http.build();
 //	}
 
-	
-	
+	// 2. Using JWT Configuration
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-	    http.csrf(csrf -> csrf.disable())
-	        .authorizeHttpRequests(request -> request
-	            .requestMatchers("/user/login", "/user/register").permitAll()
-	            .anyRequest().authenticated()
-	        )
-	        .authenticationProvider(authenticationProvider()) // ✅ This is missing!
-	        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-	        .addFilterBefore(requestFilter, UsernamePasswordAuthenticationFilter.class);   
+		http.csrf(csrf -> csrf.disable())
+				.authorizeHttpRequests(request -> request.requestMatchers("/user/login", "/user/register").permitAll()
+						.anyRequest().authenticated())
+				.authenticationProvider(authenticationProvider()) // ✅ This is missing!
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.addFilterBefore(requestFilter, UsernamePasswordAuthenticationFilter.class);
 
-	    return http.build();
+		return http.build();
 	}
-
-
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-	
+
 	@Bean
 	public AuthenticationProvider authenticationProvider() {
 		DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -71,7 +67,7 @@ public class SecurityConfig {
 		provider.setUserDetailsService(userDetailsService);
 		return provider;
 	}
-	
+
 //	@Bean   
 //	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
 //		return config.getAuthenticationManager();
