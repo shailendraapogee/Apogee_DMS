@@ -33,7 +33,7 @@ public class JwtUtil {
 		secretKey = Base64.getEncoder().encodeToString(key);
 	}
 
-//	1. Without role generate toen
+//	1. Without role generate token
 
 //	public String generateToken(String username) {
 //		return Jwts.builder().setSubject(username).setIssuedAt(new Date(System.currentTimeMillis()))
@@ -41,7 +41,7 @@ public class JwtUtil {
 //				.signWith(getSignedKey(), SignatureAlgorithm.HS256).compact();
 //	}
 
-//	2. Without role generate toen
+//	2. With role generate token
 	public String generateToken(String username, List<String> roles) {
 		return Jwts.builder().setSubject(username).claim("roles", roles)
 				.setIssuedAt(new Date(System.currentTimeMillis()))

@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ import dms.repository.ProductRepository;
 public class ProductService {
 
 	@Autowired
-	private ProductRepository ProductRepository;
+	private ProductRepository productRepository;
 
 	public String uploadImageInDirectory(String path, MultipartFile file) {
 		String originalFileName = file.getOriginalFilename();
@@ -43,7 +44,16 @@ public class ProductService {
 	}
 
 	public Product saveProduct(Product product) {
-		Product savedProduct = ProductRepository.save(product);
+		Product savedProduct = productRepository.save(product);
 		return savedProduct;
 	}
+	
+	
+	 public List<Product> getAllProducts(String baseImageUrl) {
+	        List<Product> products = productRepository.findAll();
+	        for (Product product : products) {
+	            product.setImageUrl(baseImageUrl + "/" + product.getFileName());
+	        }
+	        return products;
+	    }
 }

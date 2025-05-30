@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "product")
@@ -18,6 +19,17 @@ public class Product {
 	private Long quantity;
 	private String filePath;
 	private String fileName;
+
+	@Transient
+	private String imageUrl; // For frontend display only (not stored in DB)
+
+	public String getImageUrl() {
+		return imageUrl;
+	}
+
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+	}
 
 	public Long getId() {
 		return Id;
